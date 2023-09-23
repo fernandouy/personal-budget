@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { getEnvelopes } = require('../controllers/envelopesController')
 
-router.get('/', (req, res) => {
-  res.send('Envelopes home page')
-})
+router.get('/', getEnvelopes)
 
 module.exports = router
