@@ -1,4 +1,4 @@
-const { default: mongoose } = require("mongoose");
+const { mongoose, isValidObjectId } = require("mongoose");
 const envelopeModel = require("../models/envelopeModel");
 
 exports.getEnvelopes = async (req, res, next) => {
@@ -13,7 +13,7 @@ exports.getEnvelopes = async (req, res, next) => {
 exports.getEnvelopeById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       const error = new Error("The id must be a valid MongoDB id");
       error.status = 400;
       throw error;
@@ -75,7 +75,7 @@ exports.updateEnvelope = async (req, res, next) => {
     const { id } = req.params;
     const { title, budget } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       const error = new Error("The id must be a valid MongoDB id");
       error.status = 400;
       throw error;
@@ -122,7 +122,7 @@ exports.deleteEnvelope = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!isValidObjectId(id)) {
       const error = new Error("The id must be a valid MongoDB id");
       error.status = 400;
       throw error;
@@ -139,3 +139,48 @@ exports.deleteEnvelope = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.transferBudget = async (req, res, next) => {
+  try {
+    const { fromId, toId } = req.params;
+    const { amount } = req.body;
+
+    if (!isValidObjectId(fromId) || !isValidObjectId(toId)) {
+      const error = new Error("fromId and toId parameters must be valid ObjectId");
+      error.status = 400;
+      throw error;
+    }
+
+    const fromIdEnvelope = await envelopeModel.findOne({ _id: fromId });
+    const toIdEnvelope = await envelopeModel.findOne({ _id: toId });
+
+    if (!fromIdEnvelope || !toIdEnvelope) {
+      const error = new Error('At least one or both envelopes not found');
+      error.status = 404;
+      throw error;
+    }
+
+    if (typeof amount !== "number") {
+      const error = new Error("'amount' must be a number");
+      error.status = 400;
+      throw error;
+    }
+
+    if (fromIdEnvelope.budget < amount) {
+      const error = new Error("'amount' must be less than original envelope budget");
+      error.status = 400;
+      throw error;
+    }
+
+    fromIdEnvelope.budget -= amount;
+    toIdEnvelope.budget += amount;
+
+    const updatedFromEnvelope = await envelopeModel.findOneAndUpdate({ _id: fromId }, { budget: fromIdEnvelope.budget }, { new: true });
+    const updatedToEnvelope = await envelopeModel.findOneAndUpdate({ _id: toId }, { budget: toIdEnvelope.budget }, { new: true });
+
+    res.status(200).json({ success: true, status: 200, message: "Transfer budget updated", data: updatedToEnvelope })
+
+  } catch (error) {
+    next(error)
+  }
+}
