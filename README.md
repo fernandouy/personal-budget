@@ -1,13 +1,10 @@
 # Personal Budguet Project
-A Personal Budguet API built using Express.js. Built through [Codecademy's Back-End Engineer](https://www.codecademy.com/career-journey/back-end-engineer) Career Path
-
-## Installation
-1. Clone this repository `git clone`
-2. Install Node.js for your system
-3. Open terminal on path of your cloned project and run `npm install`
-4. Start the server by executing `npm run start` from command line
+A Personal Budguet API built using Express.js and MongoDB. Built through [Codecademy's Back-End Engineer](https://www.codecademy.com/career-journey/back-end-engineer) Career Path
 
 ## Endpoints
-```
-GET 
-```
+- Retrive all envelopes `GET /envelopes`
+- Retrive one envelope by id `GET /envelopes/:id`
+- Update envelope by id `PUT /envelopes/:id`
+- Transfer budget amount from envelope to another envelope `PUT /envelopes/:fromId/transfer/:toId`
+- Create new envelope `POST /envelopes`
+- Delete envelope by id `DELETE /envelopes/:id`
