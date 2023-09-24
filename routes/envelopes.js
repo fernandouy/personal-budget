@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getEnvelopes } = require('../controllers/envelopesController')
+const { getEnvelopes, getEnvelopeById, addEnvelope } = require('../controllers/envelopesController');
 
-router.get('/', getEnvelopes)
+router.get('/', getEnvelopes);
 
-module.exports = router
+router.get('/:id', getEnvelopeById);
+
+router.post('/', addEnvelope);
+
+module.exports = router;
